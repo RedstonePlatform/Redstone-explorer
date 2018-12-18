@@ -1,7 +1,7 @@
 @model StratisAddressPayload
 @{
-    ViewBag.Title = "Stratis Address Generator";
-    ViewBag.Description = "Generate a Stratis address with a public address to receive your coins and a private key that spends your coins.";
+    ViewBag.Title = "Redstone Address Generator";
+    ViewBag.Description = "Generate a Redstone address with a public address to receive your coins and a private key that spends your coins.";
     Layout = "_Layout";
 }
 <section class="welcome-area pb-4" id="welcome-1">
@@ -9,7 +9,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 pt-5 align-self-center text-center">
-                    <h2>Stratis Public Key</h2>
+                    <h2>Redstone Public Key</h2>
                     <img src="@Url.Action("Qr", new {value = Model.PublicKey})" class="qr"/>
                     <div class="input-group mb-3 mt-2 input-group-lg pl-lg-5 pr-lg-5">
                         <div class="input-group-prepend">
@@ -23,7 +23,7 @@
                     <p class="m-0 change-success">This is your address to receive coins, it's public.</p>
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 pt-5 align-self-center text-center">
-                    <h2>Stratis Private Address</h2>
+                    <h2>Redstone Private Address</h2>
                     <img src="@Url.Action("Qr", new {value = Model.PrivateKey})" class="qr"/>
                     <div class="input-group mb-3 mt-2 input-group-lg pl-lg-5 pr-lg-5">
                         <div class="input-group-prepend">
