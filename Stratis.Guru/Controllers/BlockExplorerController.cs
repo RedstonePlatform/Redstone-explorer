@@ -27,16 +27,16 @@ namespace Stratis.Guru.Controllers
         
         public IActionResult Index()
         {
-            var latestBlockClient = new RestClient($"{_nakoApiSettings.Endpoint}query/block/Latest/");
+            var latestBlockClient = new RestClient($"{_nakoApiSettings.Endpoint}query/block/Latest/transactions");
             var latestBlockRequest = new RestRequest(Method.GET);
             var latestBlockResponse = latestBlockClient.Execute(latestBlockRequest);
             ViewBag.LatestBlock = JsonConvert.DeserializeObject(latestBlockResponse.Content);
             
-            ViewBag.BlockchainHeight = ViewBag.LatestBlock.BlockIndex;
+            ViewBag.BlockchainHeight = ViewBag.LatestBlock.blockIndex;
 
             var x = new List<dynamic>();
 
-            for (int i = (int)ViewBag.LatestBlock.BlockIndex; i >= (int)ViewBag.LatestBlock.BlockIndex-25; i--)
+            for (int i = (int)ViewBag.LatestBlock.blockIndex; i >= (int)ViewBag.LatestBlock.blockIndex-5; i--)
             {
                 var endpointClient = new RestClient($"{_nakoApiSettings.Endpoint}query/block/index/{i}/transactions");
                 var enpointRequest = new RestRequest(Method.GET);

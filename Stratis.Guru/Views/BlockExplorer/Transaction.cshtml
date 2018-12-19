@@ -1,8 +1,8 @@
 @model dynamic
 @{
-    ViewBag.Title = $"Transaction {Model.TransactionId}";
+    ViewBag.Title = $"Transaction {Model.transactionId}";
     Layout = "_Layout";
-    ViewBag.Query = Model.TransactionId;
+    ViewBag.Query = Model.transactionId;
 }
 @section Style
 {
@@ -35,34 +35,34 @@
                             <tr>
                                 <td><strong>Transaction ID</strong></td>
                                 <td>
-                                    <a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@Model.TransactionId">@Model.TransactionId</a>
+                                    <a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@Model.transactionId">@Model.transactionId</a>
                                     <a href="#" class="copy-me"><i class="fa fa-copy"></i></a>
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>Block Hash</strong></td>
                                 <td>
-                                    <a asp-controller="BlockExplorer" asp-action="BlockHash" asp-route-hash="@Model.BlockHash">@Model.BlockHash</a>
+                                    <a asp-controller="BlockExplorer" asp-action="BlockHash" asp-route-hash="@Model.blockHash">@Model.blockHash</a>
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>Block Height</strong></td>
                                 <td>
-                                    <a asp-controller="BlockExplorer" asp-action="Block" asp-route-block="@Model.BlockIndex">@Model.BlockIndex</a>
+                                    <a asp-controller="BlockExplorer" asp-action="Block" asp-route-block="@Model.blockIndex">@Model.blockIndex</a>
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>Confirmations</strong></td>
                                 <td>
-                                    @Model.Confirmations
+                                    @Model.confirmations
                                 </td>
                             </tr>
                             
                             <tr>
                                 <td><strong>Block Date/Time</strong></td>
-                                <td>@Model.Timestamp.ToString("F")</td>
+                                <td>@Model.timestamp.ToString("F")</td>
                             </tr>
-                            @if (Model.Outputs != null)
+                            @if (Model.outputs != null)
                             {
                                 <tr>
                                     <td><strong>Total Output</strong></td>
@@ -70,11 +70,11 @@
                                         @{
                                             double totalOutpus = 0;
                                         }
-                                        @foreach (var t in Model.Outputs)
+                                        @foreach (var t in Model.outputs)
                                         {
-                                            totalOutpus += (double) t.Balance;
+                                            totalOutpus += (double) t.balance;
                                         }
-                                        @totalOutpus.ToString("N8") TXRD
+                                        @totalOutpus.ToString("N8") STRAT
                                     </td>
                                 </tr>
                             }
@@ -101,11 +101,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                            @foreach (var input in Model.Inputs)
+                            @foreach (var input in Model.inputs)
                             {
                                 <tr>
-                                    <td>@input.InputIndex</td>
-                                    <td><a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@input.InputTransactionId">@input.InputTransactionId</a></td>
+                                    <td>@input.inputIndex</td>
+                                    <td><a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@input.inputTransactionId">@input.inputTransactionId</a></td>
                                 </tr>
                             }
                         </tbody>
@@ -133,13 +133,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                            @foreach (var output in Model.Outputs)
+                            @foreach (var output in Model.outputs)
                             {
                                 <tr>
-                                    <td>@output.Index</td>
-                                    <td><a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="@output.Address">@output.Address</a></td>
-                                    <td>@output.OutputType</td>
-                                    <td>@output.Balance.ToString("N8") TXRD</td>
+                                    <td>@output.index</td>
+                                    <td><a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="@output.address">@output.address</a></td>
+                                    <td>@output.outputType</td>
+                                    <td>@output.balance.ToString("N8") STRAT</td>
                                 </tr>
                             }
                         </tbody>

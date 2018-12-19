@@ -1,8 +1,8 @@
 @model dynamic
 @{
-    ViewBag.Title = $"Address {Model.Address}";
+    ViewBag.Title = $"Address {Model.address}";
     Layout = "_Layout";
-    ViewBag.Query = Model.Address;
+    ViewBag.Query = Model.address;
 }
 @section Style
 {
@@ -30,30 +30,30 @@
                             <tr>
                                 <td><strong>Address</strong></td>
                                 <td>
-                                    <a class="to-copy" asp-controller="BlockExplorer" asp-action="Address" asp-route-address="@Model.Address">@Model.Address</a>
+                                    <a class="to-copy" asp-controller="BlockExplorer" asp-action="Address" asp-route-address="@Model.address">@Model.address</a>
                                     <a href="#" class="copy-me"><i class="fa fa-copy"></i></a>
                                 </td>
                             </tr>
                             <tr>
                                 <td><strong>No. Transactions</strong></td>
-                                <td>@Model.Transactions.Count</td>
+                                <td>@Model.transactions.Count</td>
                             </tr>
                             <tr>
                                 <td><strong>Balance</strong></td>
-                                <td>@Model.Balance.ToString("N8") TXRD</td>
+                                <td>@Model.balance.ToString("N8") STRAT</td>
                             </tr>
                             
                             <tr>
                                 <td><strong>Unconfirmed Balance</strong></td>
-                                <td>@Model.UnconfirmedBalance.ToString("N8") TXRD</td>
+                                <td>@Model.unconfirmedBalance.ToString("N8") STRAT</td>
                             </tr>
                             <tr>
                                 <td><strong>Total Received</strong></td>
-                                <td>@Model.TotalReceived.ToString("N8") TXRD</td>
+                                <td>@Model.totalReceived.ToString("N8") STRAT</td>
                             </tr>
                             <tr>
                                 <td><strong>Total Sent</strong></td>
-                                <td>@Model.TotalSent.ToString("N8") TXRD</td>
+                                <td>@Model.totalSent.ToString("N8") STRAT</td>
                             </tr>
                         </tbody>
                     </table>
@@ -61,7 +61,7 @@
             </div>
             <div class="col-lg-3 col-md-3 col-sm-12">
                 <div class="qr">
-                    <img src="@Url.Action("Qr", "Home", new {value=Model.Address})" class="img-fluid d-block mx-auto" alt="">
+                    <img src="@Url.Action("Qr", "Home", new {value=Model.address})" class="img-fluid d-block mx-auto" alt="">
                 </div>
             </div>
         </div>
@@ -89,15 +89,15 @@
                         @{
                             double total = 0;
                         }
-                        @foreach (var transaction in Model.Transactions)
+                        @foreach (var transaction in Model.transactions)
                         {
                             total += (double)transaction.value;
                             <tr>
                                 <td><a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@transaction.transactionHash">@transaction.transactionHash.ToString().Substring(0, 25)...</a></td>
-                                <td><a asp-controller="BlockExplorer" asp-action="Block" asp-route-block="@transaction.BlockIndex">@transaction.BlockIndex</a></td>
+                                <td><a asp-controller="BlockExplorer" asp-action="Block" asp-route-block="@transaction.blockIndex">@transaction.blockIndex</a></td>
                                 <td>-</td>
-                                <td><span class="@(transaction.value > 0 ? "green" : "red")">@transaction.value.ToString("N8") TXRD</span></td>
-                                <td>@total.ToString("N8") TXRD</td>
+                                <td><span class="@(transaction.value > 0 ? "green" : "red")">@transaction.value.ToString("N8") STRAT</span></td>
+                                <td>@total.ToString("N8") STRAT</td>
                             </tr>
                         }
                         </tbody>
