@@ -36,27 +36,27 @@ namespace Stratis.Guru.Controllers
         {
             double displayPrice = 0;
             var rqf = Request.HttpContext.Features.Get<IRequestCultureFeature>();
-            dynamic coinmarketcap = JsonConvert.DeserializeObject(_memoryCache.Get("Coinmarketcap").ToString());
-            var last24Change = coinmarketcap.data.quotes.USD.percent_change_24h / 100;
+            // dynamic coinmarketcap = JsonConvert.DeserializeObject(_memoryCache.Get("Coinmarketcap").ToString());
+            var last24Change = 0; // coinmarketcap.data.quotes.USD.percent_change_24h / 100;
             
             if (rqf.RequestCulture.UICulture.Name.Equals("en-US"))
             {
-                displayPrice = coinmarketcap.data.quotes.USD.price;
+                displayPrice = 0; // coinmarketcap.data.quotes.USD.price;
             }
             else
             {
-                dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Fixer").ToString());
-                var dollarRate = fixerApiResponse.rates.USD;
-                try
-                {
-                    var regionInfo = new RegionInfo(rqf.RequestCulture.UICulture.Name.ToUpper());
-                    var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
-                    displayPrice = 1 / (double) dollarRate * (double) coinmarketcap.data.quotes.USD.price * browserCurrencyRate;
-                }
-                catch
-                {
-                    // ignored
-                }
+                //    dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Fixer").ToString());
+                //    var dollarRate = fixerApiResponse.rates.USD;
+                //    try
+                //    {
+                //        var regionInfo = new RegionInfo(rqf.RequestCulture.UICulture.Name.ToUpper());
+                //        var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
+                //        displayPrice = 1 / (double) dollarRate * (double) coinmarketcap.data.quotes.USD.price * browserCurrencyRate;
+                //    }
+                //    catch
+                //    {
+                //        // ignored
+                //    }
             }
             
             return View(new Ticker

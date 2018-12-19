@@ -40,20 +40,20 @@
                             </tr>
                             <tr>
                                 <td><strong>Balance</strong></td>
-                                <td>@Model.balance.ToString("N8") STRAT</td>
+                                <td>@Model.balance.ToString("N8") TXRD</td>
                             </tr>
                             
                             <tr>
                                 <td><strong>Unconfirmed Balance</strong></td>
-                                <td>@Model.unconfirmedBalance.ToString("N8") STRAT</td>
+                                <td>@Model.unconfirmedBalance.ToString("N8") TXRD</td>
                             </tr>
                             <tr>
                                 <td><strong>Total Received</strong></td>
-                                <td>@Model.totalReceived.ToString("N8") STRAT</td>
+                                <td>@Model.totalReceived.ToString("N8") TXRD</td>
                             </tr>
                             <tr>
                                 <td><strong>Total Sent</strong></td>
-                                <td>@Model.totalSent.ToString("N8") STRAT</td>
+                                <td>@Model.totalSent.ToString("N8") TXRD</td>
                             </tr>
                         </tbody>
                     </table>
@@ -96,8 +96,8 @@
                                 <td><a asp-controller="BlockExplorer" asp-action="Transaction" asp-route-transactionId="@transaction.transactionHash">@transaction.transactionHash.ToString().Substring(0, 25)...</a></td>
                                 <td><a asp-controller="BlockExplorer" asp-action="Block" asp-route-block="@transaction.blockIndex">@transaction.blockIndex</a></td>
                                 <td>-</td>
-                                <td><span class="@(transaction.value > 0 ? "green" : "red")">@transaction.value.ToString("N8") STRAT</span></td>
-                                <td>@total.ToString("N8") STRAT</td>
+                                <td><span class="@(transaction.value > 0 ? "green" : "red")">@transaction.value.ToString("N8") TXRD</span></td>
+                                <td>@total.ToString("N8") TXRD</td>
                             </tr>
                         }
                         </tbody>

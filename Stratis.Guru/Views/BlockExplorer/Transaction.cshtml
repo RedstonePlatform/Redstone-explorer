@@ -74,7 +74,7 @@
                                         {
                                             totalOutpus += (double) t.balance;
                                         }
-                                        @totalOutpus.ToString("N8") STRAT
+                                        @totalOutpus.ToString("N8") TXRD
                                     </td>
                                 </tr>
                             }
@@ -139,7 +139,7 @@
                                     <td>@output.index</td>
                                     <td><a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="@output.address">@output.address</a></td>
                                     <td>@output.outputType</td>
-                                    <td>@output.balance.ToString("N8") STRAT</td>
+                                    <td>@output.balance.ToString("N8") TXRD</td>
                                 </tr>
                             }
                         </tbody>
