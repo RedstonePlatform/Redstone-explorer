@@ -8,6 +8,8 @@
 	<meta name="Content-Language" content="en">
 	<meta name="Description" content="@(ViewBag.Description??"Stratis.Guru is a Simple and Free $TXRD ticker, an Stratis Address Generator and a Vanity Address service.")">
 	<meta name="Keywords" content="stratis,bitcoin,cryptos,cryptocurrencies,coins,$TXRD,ticker,explorer,block explorer,vanity address,stratis block explorer,$strat block explorer,stratis generator,stratis price ticker,stratis preev,stratis vanity address,clint.network,SR2ZXnhRnMqJNoeDiCFUnaug7TKHJocwDd,">
+	<meta name="Description" content="@(ViewBag.Description ?? "Stratis.Guru is a Simple and Free $STRAT ticker, an Stratis Address Generator and a Vanity Address service.")">
+	<meta name="Keywords" content="stratis,bitcoin,cryptos,cryptocurrencies,coins,$STRAT,ticker,explorer,block explorer,vanity address,stratis block explorer,$strat block explorer,stratis generator,stratis price ticker,stratis preev,stratis vanity address,clint.network,SR2ZXnhRnMqJNoeDiCFUnaug7TKHJocwDd,">
 	<meta name="Author" content="Clint.Network">
 	<meta name="Identifier-Url" content="http://stratis.guru">
 	<meta name="Reply-To" content="stratis-guru@volto.io">
@@ -21,7 +23,7 @@
 	<link href="~/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	<link href="~/css/owl.carousel.min.css" rel="stylesheet" type="text/css">
 	<link href="~/css/owl.theme.default.min.css" rel="stylesheet" type="text/css">
-	<link href="~/npm/nprogress/nprogress.css" rel="stylesheet" type="text/css">
+	<link href="~/lib/nprogress/nprogress.css" rel="stylesheet" type="text/css">
 	<environment include="Development">
 		<link href="~/css/default.css" rel="stylesheet" type="text/css">
 	</environment>
@@ -31,7 +33,6 @@
 	@RenderSection("Style", false)
 </head>
 <body>
-<div class="shadow-inset"></div>
 <header class="header-area">
 	<div class="container">
 		<div class="row">
@@ -48,7 +49,6 @@
 						<li class="@(Context.Request.Path.Equals(Url.Action("Generator", "Home")) ? "active":"")"><a asp-action="Generator" asp-controller="Home"><i class="fa fa-qrcode"></i> GENERATOR</a></li>
 						<li class="@(Context.Request.Path.Equals(Url.Action("Documentation", "Home")) ? "active":"")"><a asp-action="Documentation" asp-controller="Home"><i class="fa fa-book"></i> API</a></li>
 						<li class="@(Context.Request.Path.Equals(Url.Action("About", "Home")) ? "active":"")"><a asp-action="About" asp-controller="Home"><i class="fa fa-info-circle"></i> ABOUT</a></li>
-						@*<li><a asp-action="Contact" asp-controller="Home"><i class="fa fa-envelope"></i> CONTACT</a></li>*@
 					</ul>
 					<a class='menu-trigger'>
 						<span>Menu</span>
@@ -60,7 +60,7 @@
 </header>
 @RenderBody()
 <div id="crafted">
-	<p class="text-center small">Proudly Crafted with 💖 by <a href="https://twitter.com/clint_network" target="_blank">Clint.Network</a> — Help me to maintain by sending some $TXRD at <a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="SRCzydu7yjS2VGv2YuHZS83Nekx42PVPdy">SRCzydu7yjS2VGv2YuHZS83Nekx42PVPdy</a>.</p>
+	<p class="text-center small">Proudly Crafted with 💖 by <a href="https://twitter.com/clint_network" target="_blank">Clint.Network</a> — Help me to maintain by sending some $STRAT at <a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="SXDaQGs56aC9ZjFzTdbhudNXTbyxU5aNXJ">SXDaQGs56aC9ZjFzTdbhudNXTbyxU5aNXJ</a>.</p>
 </div>
 <script src="~/js/jquery-2.1.0.min.js"></script>
 <script src="~/js/popper.js"></script>
@@ -71,7 +71,7 @@
 <script src="~/js/parallax.min.js"></script>
 <script src="~/js/owl.carousel.min.js"></script>
 <script src="~/js/particle-green.js"></script>
-<script src="~/npm/nprogress/nprogress.js"></script>
+<script src="~/lib/nprogress/nprogress.js"></script>
 <environment include="Development">
 	<script src="~/js/default.js"></script>
 </environment>
@@ -88,7 +88,7 @@
 
     gtag('config', 'UA-111742056-1');
 </script>
-<!--stratisguru-->
+@*stratisguru*@
 <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a48282c1ee2c396"></script>
 <script type="text/javascript">
 	$(document).ready(function(e) {
