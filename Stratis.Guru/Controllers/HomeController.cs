@@ -23,6 +23,7 @@ using QRCoder;
 using RestSharp;
 using Stratis.Guru.Models;
 using Stratis.Guru.Modules;
+using Stratis.Guru.Services;
 using Stratis.Guru.Settings;
 
 namespace Stratis.Guru.Controllers
@@ -34,43 +35,77 @@ namespace Stratis.Guru.Controllers
         private readonly ISettings _settings;
         private readonly IParticipation _participation;
         private readonly IDraws _draws;
+        private readonly TickerService _tickerService;
         private readonly DrawSettings _drawSettings;
+        private readonly SetupSettings _setupSettings;
+        private readonly TickerSettings _tickerSettings;
+        private readonly FeaturesSettings _featuresSettings;
 
-        public HomeController(IMemoryCache memoryCache, IAsk ask, ISettings settings, IParticipation participation, IDraws draws, IOptions<DrawSettings> drawSettings)
+        public HomeController(IMemoryCache memoryCache, 
+            IAsk ask, 
+            ISettings settings, 
+            IParticipation participation, 
+            IDraws draws, 
+            TickerService tickerService,
+            IOptions<DrawSettings> drawSettings, 
+            IOptions<SetupSettings> setupSettings,
+            IOptions<TickerSettings> tickerSettings,
+            IOptions<FeaturesSettings> featuresSettings)
         {
             _memoryCache = memoryCache;
             _ask = ask;
             _settings = settings;
             _participation = participation;
             _draws = draws;
+            _tickerService = tickerService;
             _drawSettings = drawSettings.Value;
+            _setupSettings = setupSettings.Value;
+            _tickerSettings = tickerSettings.Value;
+            _featuresSettings = featuresSettings.Value;
         }
         
         public IActionResult Index()
         {
-            double displayPrice = 0;
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+            ViewBag.Ticker = _tickerSettings;
+
             var rqf = Request.HttpContext.Features.Get<IRequestCultureFeature>();
-            // dynamic coinmarketcap = JsonConvert.DeserializeObject(_memoryCache.Get("Coinmarketcap").ToString());
-            var last24Change = 0; // coinmarketcap.data.quotes.USD.percent_change_24h / 100;
-            
-            if (rqf.RequestCulture.UICulture.Name.Equals("en-US"))
+
+            // Whenever the culture has been specified in the URL, write it to a cookie. This ensures that the culture selection is
+            // available in the REST API/Web Socket call and updates, and when the user visits the website next time.
+            if (!string.IsNullOrWhiteSpace(this.Request.Query["culture"]))
             {
-                displayPrice = 0; // coinmarketcap.data.quotes.USD.price;
+                CookieRequestCultureProvider.MakeCookieValue(rqf.RequestCulture);
             }
-            else
+
+            var json = JObject.Parse(_memoryCache.Get("Ticker").ToString());
+
+            double displayPrice = (double)json.SelectToken(_tickerSettings.PricePath);
+            var last24Change = (double)json.SelectToken(_tickerSettings.PercentagePath) / 100;
+            
+            if (!rqf.RequestCulture.UICulture.Name.Equals("en-US") && !rqf.RequestCulture.UICulture.Name.Equals("en"))
             {
-                //    dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Fixer").ToString());
-                //    var dollarRate = fixerApiResponse.rates.USD;
-                //    try
-                //    {
-                //        var regionInfo = new RegionInfo(rqf.RequestCulture.UICulture.Name.ToUpper());
-                //        var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
-                //        displayPrice = 1 / (double) dollarRate * (double) coinmarketcap.data.quotes.USD.price * browserCurrencyRate;
-                //    }
-                //    catch
-                //    {
-                //        // ignored
-                //    }
+                try
+                {
+                    dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Currency").ToString());
+
+                    var dollarRate = fixerApiResponse.rates.USD;
+                    var culture = rqf.RequestCulture.UICulture.Name.ToUpper();
+
+                    if (culture == "NB" || culture == "NO")
+                    {
+                        culture = "NB-NO";
+                    }
+
+                    var regionInfo = new RegionInfo(culture);
+                    var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
+
+                    displayPrice = 1 / (double) dollarRate * (double)displayPrice * browserCurrencyRate;
+                }
+                catch
+                {
+                }
             }
             
             return View(new Ticker
@@ -83,6 +118,9 @@ namespace Stratis.Guru.Controllers
         [Route("lottery")]
         public IActionResult Lottery()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             ViewBag.NextDraw = long.Parse(_memoryCache.Get("NextDraw").ToString());
             ViewBag.Jackpot = _memoryCache.Get("Jackpot");
             ViewBag.Players = _participation.GetPlayers(_draws.GetLastDraw());
@@ -94,6 +132,9 @@ namespace Stratis.Guru.Controllers
         [Route("lottery/participate")]
         public IActionResult Participate()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             if (ModelState.IsValid)
             {
                 var lastDraw = _draws.GetLastDraw();
@@ -111,7 +152,10 @@ namespace Stratis.Guru.Controllers
         [Route("lottery/participate/{id}")]
         public IActionResult Participate(string id)
         {
-            if(HttpContext.Session.GetString("HaveBeginParticipation") == null)
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
+            if (HttpContext.Session.GetString("HaveBeginParticipation") == null)
             {
                 return RedirectToAction("Lottery");
             }
@@ -130,6 +174,9 @@ namespace Stratis.Guru.Controllers
         [Route("lottery/check-payment")]
         public IActionResult CheckPayment()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             var pubkey = ExtPubKey.Parse(_drawSettings.PublicKey);
             var depositAddress = pubkey.Derive(0).Derive(_settings.GetIterator()).PubKey.GetAddress(Network.StratisMain).ToString();
             ViewBag.DepositAddress = depositAddress;
@@ -150,6 +197,9 @@ namespace Stratis.Guru.Controllers
         [Route("lottery/new-participation")]
         public IActionResult NewParticipation()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             var ticket = Guid.NewGuid().ToString();
             HttpContext.Session.SetString("Ticket", ticket);
             ViewBag.Ticket = ticket;
@@ -168,6 +218,9 @@ namespace Stratis.Guru.Controllers
         [Route("lottery/participated")]
         public IActionResult Participated()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             ViewBag.NextDraw = long.Parse(_memoryCache.Get("NextDraw").ToString());
             ViewBag.Jackpot = _memoryCache.Get("Jackpot");
             ViewBag.Players = _participation.GetPlayers(_draws.GetLastDraw());
@@ -178,12 +231,18 @@ namespace Stratis.Guru.Controllers
         [Route("about")]
         public IActionResult About()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             return View();
         }
 
         [Route("vanity")]
         public IActionResult Vanity()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             return View();
         }
 
@@ -191,6 +250,9 @@ namespace Stratis.Guru.Controllers
         [Route("vanity")]
         public IActionResult Vanity(Vanity vanity)
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             if (ModelState.IsValid)
             {
                 _ask.NewVanity(vanity);
@@ -202,6 +264,9 @@ namespace Stratis.Guru.Controllers
         [Route("generator")]
         public IActionResult Generator()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             var stratisAddress = new Key();
             return View(new StratisAddressPayload
             {
@@ -213,6 +278,9 @@ namespace Stratis.Guru.Controllers
         [Route("qr/{value}")]
         public IActionResult Qr(string value)
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             var memoryStream = new MemoryStream();
             var qrGenerator = new QRCodeGenerator();
             var qrCodeData = qrGenerator.CreateQrCode(value, QRCodeGenerator.ECCLevel.L);
@@ -223,6 +291,9 @@ namespace Stratis.Guru.Controllers
 
         public IActionResult Documentation()
         {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
             return Redirect("/documentation");
         }
     }

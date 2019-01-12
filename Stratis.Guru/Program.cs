@@ -14,13 +14,24 @@ namespace Stratis.Guru
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
-        }
+            var chain = (args.Length == 0) ? "STRAT" : args[0].ToUpper();
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            chain = (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CHAIN"))) ? "STRAT" : Environment.GetEnvironmentVariable("CHAIN").ToUpper();
+
+            var config = new ConfigurationBuilder()
+              .SetBasePath(Directory.GetCurrentDirectory())
+              .AddJsonFile("hosting.json", optional: true)
+              .AddJsonFile("setup.json", optional: false, reloadOnChange: false)
+              .AddJsonFile(Path.Combine("Setup", $"{chain}.json"), optional: false, reloadOnChange: false)
+              .AddCommandLine(args)
+              .AddEnvironmentVariables()
+              .Build();
+
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://localhost:1989")
-                .UseSentry("https://ed8ea72e1f6341ae901d96691d9e58a0@sentry.io/1359208")
-                .UseStartup<Startup>();
+                .UseApplicationInsights()
+               .UseConfiguration(config)
+               .UseStartup<Startup>()
+               .Build().Run();
+        }
     }
 }
