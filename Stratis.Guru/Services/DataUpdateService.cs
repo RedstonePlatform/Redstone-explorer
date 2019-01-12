@@ -94,8 +94,9 @@ namespace Stratis.Guru.Services
                 }
 
                 // Get ticker and cache it.
-                _memoryCache.Set("Ticker", _tickerService.GetTicker());
-                
+                //_memoryCache.Set("Ticker", _tickerService.GetTicker());
+                _memoryCache.Set("Ticker", string.Empty);
+
                 await _hubContext.Clients.All.SendAsync("UpdateTicker", cancellationToken);
             };
 
@@ -118,8 +119,8 @@ namespace Stratis.Guru.Services
                 }
 
                 // Get ticker and cache it.
-                _memoryCache.Set("Currency", _currencyService.GetRates("USD"));
-
+                //_memoryCache.Set("Currency", _currencyService.GetRates("USD"));
+                _memoryCache.Set("Currency", string.Empty);
                 //await _hubContext.Clients.All.SendAsync("UpdateTicker", cancellationToken);
             };
 

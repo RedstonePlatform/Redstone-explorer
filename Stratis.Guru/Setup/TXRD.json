@@ -1,0 +1,31 @@
+{
+  "Nako": {
+    "ApiUrl": "http://localhost:9000/api"
+  },
+  "Currency": {
+    "AutoConvert": false
+  },
+	"Ticker": {
+		"ApiUrl": "https://api.coincap.io/v2/assets/stratis",
+		"WebUrl": "https://coincap.io/assets/stratis",
+		"PricePath": "data.priceUsd",
+		"PercentagePath": "data.changePercent24Hr"
+	},
+	"Setup": {
+		"Title": "Redstone Test Explorer",
+		"Chain": "TXRD",
+		"Coin": "TXRD",
+		"Footer": "https://stratisplatform.com/"
+	},
+	"Features": {
+		"Home": true,
+		"Ticker": false,
+		"Lottery": false,
+		"Explorer": true,
+		"Vanity": false,
+		"Generator": false,
+		"API": true,
+		"About": false,
+		"Footer": true
+	}
+}
