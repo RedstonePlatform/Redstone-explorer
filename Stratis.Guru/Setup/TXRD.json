@@ -15,7 +15,8 @@
 		"Title": "Redstone Test Explorer",
 		"Chain": "TXRD",
 		"Coin": "TXRD",
-		"Footer": "https://stratisplatform.com/"
+		"Footer": "http://www.redstoneplatform.com",
+		"NumBlocksToShow":  10
 	},
 	"Features": {
 		"Home": true,

@@ -51,7 +51,7 @@ namespace Stratis.Guru.Controllers
             var latestBlocks = new List<dynamic>();
             latestBlocks.Add(latestBlock);
 
-            for (int i = (int)ViewBag.LatestBlock.BlockIndex-1; i >= (int)ViewBag.LatestBlock.BlockIndex-5; i--)
+            for (int i = (int)ViewBag.LatestBlock.BlockIndex-1; i >= (int)ViewBag.LatestBlock.BlockIndex- ViewBag.Setup.NumBlocksToShow+1; i--)
             {
                 latestBlocks.Add(_indexService.GetBlockByHeight(i));
             }

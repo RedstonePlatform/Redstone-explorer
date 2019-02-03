@@ -11,6 +11,7 @@ namespace Stratis.Guru.Settings
         {
             Title = "Stratis.guru";
             Chain = "Stratis";
+            NumBlocksToShow = 5;
         }
 
         public string Title { get; set; }
@@ -20,5 +21,7 @@ namespace Stratis.Guru.Settings
         public string Coin { get; set; }
 
         public string Footer { get; set; }
+
+        public int NumBlocksToShow { get; set; }
     }
 }
