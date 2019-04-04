@@ -51,6 +51,7 @@ namespace Stratis.Guru
             services.Configure<TickerSettings>(Configuration.GetSection("Ticker"));
             services.Configure<SetupSettings>(Configuration.GetSection("Setup"));
             services.Configure<FeaturesSettings>(Configuration.GetSection("Features"));
+            services.Configure<ColdStakingSettings>(Configuration.GetSection("ColdStaking"));
 
             services.AddMemoryCache();
 
@@ -111,8 +112,8 @@ namespace Stratis.Guru
             });
 
             // Add Culture Detection Support
-            List<CultureInfo> allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(x => !x.IsNeutralCulture).ToList();
-            RequestCulture defaultCulture = new RequestCulture("en-US");
+            var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures).ToList();   //.Where(x => !x.IsNeutralCulture)
+            var defaultCulture = new RequestCulture("en-US");
             defaultCulture.UICulture.NumberFormat.CurrencySymbol = "$";
 
             // Add some known cultures that doesn't parse well in Chrome/Firefox.

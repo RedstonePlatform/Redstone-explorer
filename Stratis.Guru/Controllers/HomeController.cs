@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -21,6 +22,7 @@ using Newtonsoft.Json.Linq;
 using PaulMiami.AspNetCore.Mvc.Recaptcha;
 using QRCoder;
 using RestSharp;
+using Stratis.Guru.Hubs;
 using Stratis.Guru.Models;
 using Stratis.Guru.Modules;
 using Stratis.Guru.Services;
@@ -35,37 +37,38 @@ namespace Stratis.Guru.Controllers
         private readonly ISettings _settings;
         private readonly IParticipation _participation;
         private readonly IDraws _draws;
-        private readonly TickerService _tickerService;
-        private readonly CurrencyService _currencyService;
+        private readonly IHubContext<UpdateHub> _hubContext;
+        private readonly UpdateHub _hub;
         private readonly DrawSettings _drawSettings;
         private readonly SetupSettings _setupSettings;
         private readonly TickerSettings _tickerSettings;
         private readonly FeaturesSettings _featuresSettings;
+        private readonly ColdStakingSettings _coldStakingSettings;
 
         public HomeController(IMemoryCache memoryCache, 
             IAsk ask, 
             ISettings settings, 
             IParticipation participation, 
-            IDraws draws, 
-            TickerService tickerService,
-            CurrencyService currencyService,
+            IDraws draws,
+            IHubContext<UpdateHub> hubContext,
+            UpdateHub hub,
             IOptions<DrawSettings> drawSettings, 
             IOptions<SetupSettings> setupSettings,
-            IOptions<TickerSettings> tickerSettings,
-            IOptions<FeaturesSettings> featuresSettings)
+            IOptions<FeaturesSettings> featuresSettings,
+            IOptions<ColdStakingSettings> coldStakingSettings)
         {
             _memoryCache = memoryCache;
             _ask = ask;
             _settings = settings;
             _participation = participation;
             _draws = draws;
-            _tickerService = tickerService;
-            _currencyService = currencyService;
+            _hub = hub;
+            _hubContext = hubContext;
             _drawSettings = drawSettings.Value;
             _setupSettings = setupSettings.Value;
             _tickerSettings = tickerSettings.Value;
             _featuresSettings = featuresSettings.Value;
-
+            _coldStakingSettings = coldStakingSettings.Value;
         }
         
         public IActionResult Index()
@@ -75,23 +78,67 @@ namespace Stratis.Guru.Controllers
             ViewBag.Ticker = _tickerSettings;
             ViewBag.Url = Request.Host.ToString();
 
-            if (_featuresSettings.Ticker)
+            double displayPrice = 0;
+            var rqf = Request.HttpContext.Features.Get<IRequestCultureFeature>();
+            dynamic current_price = double.Parse(_memoryCache.Get("coin_price")?.ToString() ?? "0", CultureInfo.InvariantCulture);
+            var last24Change = double.Parse(_memoryCache.Get("last_change")?.ToString() ?? "0", CultureInfo.InvariantCulture) / 100;
+            
+            if (rqf.RequestCulture.UICulture.Name.Equals("en-US"))
             {
-                var rqf = Request.HttpContext.Features.Get<IRequestCultureFeature>();
-                var ticker = _tickerService.GetCachedTicker();
-                var regionInfo = _currencyService.GetRegionaInfo(rqf);
-                var displayPrice = _currencyService.GetExchangePrice(ticker.DisplayPrice, regionInfo.ISOCurrencySymbol);
-
-                return View(new Ticker
-                {
-                    DisplayPrice = displayPrice,
-                    Last24Change = ticker.Last24Change
-                });
+                displayPrice = current_price;
             }
             else
             {
-                return View();
+                dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Fixer").ToString());
+                var dollarRate = fixerApiResponse.rates.USD;
+                try
+                {
+                    var regionInfo = new RegionInfo(rqf.RequestCulture.UICulture.Name.ToUpper());
+                    var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
+                    displayPrice = 1 / (double) dollarRate * (double) current_price * browserCurrencyRate;
+                }
+                catch
+                {
+                    // ignored
+                }
             }
+            
+            return View("Index", new Ticker
+            {
+                DisplayPrice = displayPrice,
+                Last24Change = last24Change
+            });
+        }
+
+        [Route("coldstaking-progress/{testnet?}")]
+        public IActionResult ColdStakingProgress(string testnet = null)
+        {
+            ViewBag.Testnet = testnet;
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
+            string lastColdStakingStatus;
+
+            if (!_memoryCache.TryGetValue(testnet == null ? "cold-staking-mainnet":"cold-staking-testnet", out lastColdStakingStatus))
+            {
+                var client = new RestClient(testnet == null ? _coldStakingSettings.Mainnet : _coldStakingSettings.Testnet);
+                var request = new RestRequest(Method.GET);
+                lastColdStakingStatus = client.Execute(request).Content;
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(5));
+                _memoryCache.Set(testnet == null ? "cold-staking-mainnet" : "cold-staking-testnet", lastColdStakingStatus, cacheEntryOptions);
+            }
+            ViewBag.Status = (JsonConvert.DeserializeObject(lastColdStakingStatus) as dynamic)[0];
+
+            return View();
+        }
+
+        [Route("donation/{address}")]
+        public IActionResult Donation(string address)
+        {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+            ViewBag.DonationAddress = address;
+            return Index();
         }
 
         [Route("lottery")]
@@ -232,12 +279,44 @@ namespace Stratis.Guru.Controllers
             ViewBag.Features = _featuresSettings;
             ViewBag.Setup = _setupSettings;
 
+            vanity.Prefix = $"s{vanity.Prefix}";
+
             if (ModelState.IsValid)
             {
                 _ask.NewVanity(vanity);
-                ViewBag.Succeed = true;
+                return RedirectToAction(nameof(VanityProcess), new { prefix = vanity.Prefix });
             }
+            return View(vanity);
+        }
+
+        [Route("vanity/begin-process/{prefix}")]
+        public IActionResult VanityProcess(string prefix)
+        {
+            ViewBag.Features = _featuresSettings;
+            ViewBag.Setup = _setupSettings;
+
+            ViewBag.Prefix = prefix;
+            ViewBag.Succeed = (_memoryCache.Get($"vanity[{prefix}]-pub") != null);
+            ViewBag.PublicKey = _memoryCache.Get($"vanity[{prefix}]-pub");
+            ViewBag.PrivateKey = _memoryCache.Get($"vanity[{prefix}]-pri");
+            ViewBag.Count = _memoryCache.Get($"vanity[{prefix}]-count");
+
             return View();
+        }
+
+        [Route("vanity/drop/{prefix}")]
+        public IActionResult DropVanity(string prefix)
+        {
+            try
+            {
+                _memoryCache.Remove($"vanity[{prefix}]-pub");
+                _memoryCache.Remove($"vanity[{prefix}]-pri");
+                _memoryCache.Remove($"vanity[{prefix}]-count");
+            }
+            catch
+            {
+            }
+            return RedirectToAction(nameof(Vanity));
         }
 
         [Route("generator")]

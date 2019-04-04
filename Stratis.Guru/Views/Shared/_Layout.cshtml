@@ -13,15 +13,27 @@
 	<meta name="Identifier-Url" content="//@ViewBag.Url">
 	<meta name="Reply-To" content="stratis-guru@volto.io">
 	<meta name="Revisit-After" content="1 day">
+    <meta name="image" content="https://stratis.guru/images/og.png">
 	<meta name="twitter:card" content="summary">
 	<meta name="twitter:site" content="clint_network">
-	<meta name="twitter:title" content="@ViewBag.Setup.Title | Online @ViewBag.Setup.Chain ($@ViewBag.Setup.Coin) price ticker">
-	<meta name="twitter:description" content="@ViewBag.Setup.Title is a Simple and Free $@ViewBag.Setup.Coin ticker, an Address Generator and a Vanity Address service.">
+	<meta name="twitter:title" content="@ViewBag.Setup.Title | Online Stratis ($STRAT) price ticker">
+	<meta name="twitter:description" content="@(ViewBag.Description ?? "Stratis.Guru is a Simple and Free $STRAT ticker, an Stratis Address Generator and a Vanity Address service.")">
+    <meta name="theme-color" content="#1f2228" />
+    <meta itemprop="name" content="@ViewBag.Setup.Title | @ViewBag.Title">
+    <meta itemprop="description" content="@(ViewBag.Description ?? "Stratis.Guru is a Simple and Free $STRAT ticker, an Stratis Address Generator and a Vanity Address service.")">
+    <meta itemprop="image" content="https://stratis.guru/images/og.png">
+    <meta name="og:title" content="@ViewBag.Setup.Title | @ViewBag.Title">
+    <meta name="og:description" content="@(ViewBag.Description ?? "Stratis.Guru is a Simple and Free $STRAT ticker, an Stratis Address Generator and a Vanity Address service.")">
+    <meta name="og:image" content="https://stratis.guru/images/og.png">
+    <meta name="og:url" content="https://stratis.guru/">
+    <meta name="og:site_name" content="Stratis.Guru">
+    <meta name="og:locale" content="en_US">
+    <meta name="og:type" content="website">
+    <link rel="apple-touch-icon" sizes="192x192" href="https://stratis.guru/images/og.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://stratis.guru/images/og.png">
 	<link rel="icon" href="~/favicon.ico" />
 	<link href="~/css/bootstrap.min.css" rel="stylesheet" type="text/css">
 	<link href="~/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-	<link href="~/css/owl.carousel.min.css" rel="stylesheet" type="text/css">
-	<link href="~/css/owl.theme.default.min.css" rel="stylesheet" type="text/css">
 	<link href="~/lib/nprogress/nprogress.css" rel="stylesheet" type="text/css">
 	<environment include="Development">
 		<link href="~/css/default.css" rel="stylesheet" type="text/css">
@@ -39,7 +51,7 @@
                 <div class="col-12">
                     <nav class="main-nav">
                         <a asp-controller="Home" asp-action="Index" class="logo ">
-                            <img src="~/images/logo.png" class="" alt="@ViewBag.Setup.Title" /> <span class="text-white">@ViewBag.Setup.Title</span> <span class="text-info text-hide">v2</span>
+                            <img src="~/images/logo.png" class="" alt="Stratis.Guru" /> <span class="text-white">@ViewBag.Setup.Title</span> <sup><span class="text-muted small">v2</span></sup>
                         </a>
                         <ul class="nav">
                             @if (ViewBag.Features.Home)
@@ -54,7 +66,12 @@
 
                             @if (ViewBag.Features.Explorer)
                             {
-                                <li class="@(Context.Request.Path.Equals(Url.Action("Index", "BlockExplorer")) ? "active":"")"><a asp-action="Index" asp-controller="BlockExplorer"><i class="fa fa-cube"></i> BLOCK EXPLORER</a></li>
+                                <li class="@(Context.Request.Path.Equals(Url.Action("Index", "BlockExplorer")) ? "active":"")"><a asp-action="Index" asp-controller="BlockExplorer"><i class="fa fa-cube"></i> EXPLORER</a></li>
+                            }
+
+                            @if (ViewBag.Features.ColdStaking)
+                            {
+                                <li class="@(Context.Request.Path.Equals(Url.Action("ColdStakingProgress", "Home")) ? "active":"")"><a asp-action="ColdStakingProgress" asp-controller="Home"><i class="fa fa-snowflake-o"></i> COLD STAKING</a></li>
                             }
 
                             @if (ViewBag.Features.Vanity)
@@ -86,24 +103,12 @@
         </div>
     </header>
     @RenderBody()
-
-
     @if (ViewBag.Features.Footer)
     {
-        @if (string.IsNullOrWhiteSpace(ViewBag.Setup.Footer))
-        {
-            <div id="crafted">
-                <p class="text-center small">Proudly Crafted with 💖 by <a href="https://twitter.com/clint_network" target="_blank">Clint.Network</a> — Help me to maintain by sending some $STRAT at <a asp-controller="BlockExplorer" asp-action="Address" asp-route-address="SXDaQGs56aC9ZjFzTdbhudNXTbyxU5aNXJ">SXDaQGs56aC9ZjFzTdbhudNXTbyxU5aNXJ</a>.</p>
-            </div>
-        }
-        else
-        {
-            <div id="crafted">
-                <p class="text-center small">@ViewBag.Setup.Footer</p>
-            </div>
-        }
+        <div id="crafted">
+            <p class="text-center small">Proudly Crafted with 💖 by <a href="https://twitter.com/clint_network" target="_blank">Clint.Network</a> — <i class="fa fa-github"></i> Get the <a href="https://github.com/clintnetwork/stratis-guru-v2" target="_blank">Source on GitHub</a> — Help me to maintain by sending some $STRAT at <a asp-controller="Home" asp-action="Donation" asp-route-address="SjJCRWmwh1SU5TkDDCpkoHCZSKATcPwA1E">SjJCRWmwh1SU5TkDDCpkoHCZSKATcPwA1E</a>.</p>
+        </div>
     }
-
     <script src="~/js/jquery-2.1.0.min.js"></script>
     <script src="~/js/popper.js"></script>
     <script src="~/js/bootstrap.min.js"></script>
@@ -111,8 +116,8 @@
     <script src="~/js/scrollreveal.min.js"></script>
     <script src="~/js/jquery.downCount.js"></script>
     <script src="~/js/parallax.min.js"></script>
-    <script src="~/js/owl.carousel.min.js"></script>
     <script src="~/js/particle-green.js"></script>
+    <script src="~/lib/push.js/bin/push.min.js"></script>
     <script src="~/lib/nprogress/nprogress.js"></script>
     <environment include="Development">
         <script src="~/js/default.js"></script>
@@ -127,7 +132,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'UA-111742056-1');
 </script>
 @*stratisguru*@

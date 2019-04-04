@@ -43,24 +43,44 @@ namespace Stratis.Guru.Controllers
         {
             try
             {
-                var ticker = _tickerService.GetCachedTicker();
-
+                var current_price = double.Parse(_memoryCache.Get("coin_price").ToString(), CultureInfo.InvariantCulture);
+                var last24Change = double.Parse(_memoryCache.Get("last_change").ToString(), CultureInfo.InvariantCulture) / 100;
                 if (notApi)
                 {
                     var rqf = Request.HttpContext.Features.Get<IRequestCultureFeature>();
-                    var regionInfo = _currencyService.GetRegionaInfo(rqf);
-                    var displayPrice = _currencyService.GetExchangePrice(ticker.DisplayPrice, regionInfo.ISOCurrencySymbol);
-
+            
+                    double displayPrice = 0;
+            
+                    if (rqf.RequestCulture.UICulture.ThreeLetterISOLanguageName.Equals("eng"))
+                    {
+                        displayPrice = current_price;
+                    }
+                    else
+                    {
+                        dynamic fixerApiResponse = JsonConvert.DeserializeObject(_memoryCache.Get("Fixer").ToString());
+                        var dollarRate = fixerApiResponse.rates.USD;
+                        try
+                        {
+                            var regionInfo = new RegionInfo(rqf.RequestCulture.UICulture.Name.ToUpper());
+                            var browserCurrencyRate = (double) ((JObject) fixerApiResponse.rates)[regionInfo.ISOCurrencySymbol];
+                            displayPrice = 1 / (double) dollarRate * current_price * browserCurrencyRate;
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+                    }
+                    
                     return new TickerApi
                     {
                         UsdPrice = (displayPrice * amount).ToString("C"),
-                        Last24Change = (ticker.Last24Change).ToString("P2")
+                        Last24Change = last24Change.ToString("P2")
                     };
                 }
                 return new Ticker
                 {
-                    DisplayPrice = ticker.DisplayPrice * amount,
-                    Last24Change = ticker.Last24Change
+                    DisplayPrice = current_price * amount,
+                    Last24Change = last24Change
                 };
             }
             catch
